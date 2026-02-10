@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>✨ Seasonal Percentage Calendar ✨</title>
+
+<style>
+:root {
+    --bg1:#0f172a;
+    --bg2:#1e293b;
+}
+
+body {
+    margin: 0;
+    padding: 20px;
+    background: linear-gradient(135deg, var(--bg1), var(--bg2));
+    font-family: 'Segoe UI', sans-serif;
+    color: white;
+    overflow-x: hidden;
+    transition: background 1s ease;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    text-align: center;
+    opacity: 0.8;
+    margin-bottom: 20px;
+}
+
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.month {
+    background: rgba(255,255,255,0.08);
+    border-radius: 15px;
+    padding: 15px;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.month:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+}
+
+.month h2 {
+    text-align: center;
+    font-size: 18px;
+}
+
+.weekdays, .days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+}
+
+.weekdays div {
+    font-size: 12px;
+    opacity: 0.6;
+    text-align: center;
+}
+
+.day {
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.past { background: #43e54c; color:#022c22; }
+.today { background:#e15050; font-weight:bold; }
+.future { background:#08357d; opacity:0.6; }
+
+/* ===== SEASON EFFECT LAYERS ===== */
+.season-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.snow, .flower, .leaf {
+    position: absolute;
+    top: -10%;
+    font-size: 20px;
+    animation: fall linear infinite;
+    opacity: 0.8;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(120vh) rotate(360deg);
+    }
+}
+
+/* Summer glow */
+#summerGlow {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at top,
+        rgba(255,200,100,0.25),
+        transparent 60%);
+    opacity: 0;
+    transition: opacity 1s ease;
+    pointer-events: none;
+}
+
+footer {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 13px;
+    opacity: 0.6;
+}
+</style>
+</head>
+
+<body>
+
+<h1>✨ Seasonal Percentage Calendar ✨</h1>
+<div class="subtitle" id="percentInfo"></div>
+
+<div class="calendar" id="calendar"></div>
+
+<footer>✨ Click a month to feel the season ✨</footer>
+
+<div class="season-layer" id="seasonLayer"></div>
+<div id="summerGlow"></div>
+
+<script>
+const calendar = document.getElementById("calendar");
+const today = new Date();
+const year = today.getFullYear();
+const seasonLayer = document.getElementById("seasonLayer");
+const summerGlow = document.getElementById("summerGlow");
+
+const startOfYear = new Date(year, 0, 1);
+const endOfYear = new Date(year, 11, 31);
+const percentUsed = (((today - startOfYear) / (endOfYear - startOfYear)) * 100).toFixed(2);
+document.getElementById("percentInfo").textContent =
+    `${percentUsed}% of ${year} completed`;
+
+const months = [
+ "❄️ January", "❄️ February",
+ "🌸 March", "🌸 April",
+ "☀️ May", "☀️ June", "☀️ July",
+ "🍂 August", "🍂 September", "🍂 October",
+ "❄️ November", "❄️ December"
+];
+
+function clearSeason() {
+    seasonLayer.innerHTML = "";
+    summerGlow.style.opacity = 0;
+}
+
+function createParticles(icon, count) {
+    for (let i = 0; i < count; i++) {
+        const p = document.createElement("div");
+        p.className = icon === "❄️" ? "snow" :
+                      icon === "🌸" ? "flower" : "leaf";
+        p.textContent = icon;
+        p.style.left = Math.random() * 100 + "vw";
+        p.style.animationDuration = (5 + Math.random() * 5) + "s";
+        p.style.fontSize = (14 + Math.random() * 14) + "px";
+        seasonLayer.appendChild(p);
+    }
+}
+
+function applySeason(monthIndex) {
+    clearSeason();
+
+    if ([0,1,10,11].includes(monthIndex)) {
+        document.body.style.background =
+            "linear-gradient(135deg, #0f172a, #020617)";
+        createParticles("❄️", 40);
+    }
+    else if ([2,3].includes(monthIndex)) {
+        document.body.style.background =
+            "linear-gradient(135deg, #14532d, #4ade80)";
+        createParticles("🌸", 30);
+    }
+    else if ([4,5,6].includes(monthIndex)) {
+        document.body.style.background =
+            "linear-gradient(135deg, #78350f, #fde047)";
+        summerGlow.style.opacity = 1;
+    }
+    else {
+        document.body.style.background =
+            "linear-gradient(135deg, #7c2d12, #fb923c)";
+        createParticles("🍂", 35);
+    }
+}
+
+months.forEach((monthName, monthIndex) => {
+    const monthDiv = document.createElement("div");
+    monthDiv.className = "month";
+
+    monthDiv.innerHTML = `
+        <h2>${monthName}</h2>
+        <div class="weekdays">
+            <div>Su</div><div>Mo</div><div>Tu</div>
+            <div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+        </div>
+        <div class="days"></div>
+    `;
+
+    monthDiv.onclick = () => applySeason(monthIndex);
+
+    const daysDiv = monthDiv.querySelector(".days");
+    const firstDay = new Date(year, monthIndex, 1).getDay();
+    const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+
+    for (let i = 0; i < firstDay; i++) {
+        daysDiv.appendChild(document.createElement("div"));
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+        const date = new Date(year, monthIndex, d);
+        const dayDiv = document.createElement("div");
+        dayDiv.className = "day";
+        dayDiv.textContent = d;
+
+        if (date.toDateString() === today.toDateString())
+            dayDiv.classList.add("today");
+        else if (date < today)
+            dayDiv.classList.add("past");
+        else
+            dayDiv.classList.add("future");
+
+        daysDiv.appendChild(dayDiv);
+    }
+
+    calendar.appendChild(monthDiv);
+});
+</script>
+
+</body>
+</html>
